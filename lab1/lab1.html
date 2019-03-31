@@ -131,7 +131,7 @@ $(document).ready(function () {
 <div id="main">
 <div id="background" class="section level2">
 <h2>Background</h2>
-<p>This is the day 1 computer lab session for quantitative genetic analysis. You can find the course website <a href="https://wheatme.wixsite.com/wheatme/workshop-2019">here</a>. The goal of this exercise is to set up mixed model equation (MME) and obtain solutions for best linear unbiased estimator (BLUE) and best linear unbiased prediction (BLUP).</p>
+<p>This is the day 1 computer lab session for quantitative genetic analysis. You can find the course website <a href="https://wheatme.wixsite.com/wheatme/workshop-2019">here</a>. The goal of this exercise is to set up mixed model equations (MME) and obtain solutions for best linear unbiased estimator (BLUE) and best linear unbiased prediction (BLUP).</p>
 </div>
 <div id="data" class="section level2">
 <h2>Data</h2>
@@ -142,7 +142,7 @@ $(document).ready(function () {
 
 <span class="st">`</span><span class="dt">?</span><span class="st">`</span>(australia.soybean)
 <span class="kw">head</span>(australia.soybean)</code></pre></div>
-<p>We will use <code>env</code> , <code>gen</code>, and <code>yield</code> columns in the current analysis. We can see that there are eight environments each having 58 observatios. Also, each genotype is replicated eight times (one per environment).</p>
+<p>We will use <code>env</code> , <code>gen</code>, and <code>yield</code> columns in the current analysis. We can see that there are eight environments, each having 58 observatios. Also, each genotype is replicated eight times (one per environment).</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dat &lt;-<span class="st"> </span>australia.soybean[, <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">5</span>)]
 <span class="kw">dim</span>(dat)
 <span class="kw">head</span>(dat)
@@ -240,7 +240,7 @@ sol[<span class="dv">9</span><span class="op">:</span><span class="dv">15</span>
 </div>
 <div id="lme4-r-package" class="section level2">
 <h2>lme4 R package</h2>
-<p>We can conform our resutls using the <a href="https://cran.r-project.org/web/packages/lme4/index.html">lme4</a> R package.</p>
+<p>We can confirm our resutls using the <a href="https://cran.r-project.org/web/packages/lme4/index.html">lme4</a> R package.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># install.packages(&#39;lme4&#39;)</span>
 <span class="kw">library</span>(lme4)
 fit =<span class="st"> </span><span class="kw">lmer</span>(yield <span class="op">~</span><span class="st"> </span>env <span class="op">+</span><span class="st"> </span>(<span class="dv">1</span> <span class="op">|</span><span class="st"> </span>gen), <span class="dt">data =</span> dat)
@@ -248,7 +248,7 @@ fit<span class="op">@</span>beta
 
 <span class="kw">rowMeans</span>(<span class="kw">ranef</span>(fit)<span class="op">$</span>gen)
 <span class="kw">rowMeans</span>(<span class="kw">ranef</span>(fit)<span class="op">$</span>gen)[<span class="dv">1</span><span class="op">:</span><span class="dv">7</span>]</code></pre></div>
-<p>The variance components can be also obtained.</p>
+<p>The variance components can also be obtained.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data.frame</span>((<span class="kw">summary</span>(fit))<span class="op">$</span>varcor)<span class="op">$</span>vcov</code></pre></div>
 <p>Recall that the broad-sense heritability is defined as <span class="math display">\[
 H^2 = \frac{\sigma^2_u}{ \sigma^2_u + \sigma^2_{\epsilon}/\text{rep}}.

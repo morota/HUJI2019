@@ -27,7 +27,7 @@ opts_knit$set(width=75)
 ```
 
 ## Background
-This is the day 1 computer lab session for quantitative genetic analysis. You can find the course website [here](https://wheatme.wixsite.com/wheatme/workshop-2019). The goal of this exercise is to set up mixed model equation (MME) and obtain solutions for best linear unbiased estimator (BLUE) and best linear unbiased prediction (BLUP).
+This is the day 1 computer lab session for quantitative genetic analysis. You can find the course website [here](https://wheatme.wixsite.com/wheatme/workshop-2019). The goal of this exercise is to set up mixed model equations (MME) and obtain solutions for best linear unbiased estimator (BLUE) and best linear unbiased prediction (BLUP).
 
 
 ## Data
@@ -41,7 +41,7 @@ data(australia.soybean, package = 'agridat')
 head(australia.soybean)
 ```
 
-We will use `env` , `gen`, and `yield` columns in the current analysis. We can see that there are eight environments each having 58 observatios. Also, each genotype is replicated eight times (one per environment).
+We will use `env` , `gen`, and `yield` columns in the current analysis. We can see that there are eight environments, each having 58 observatios. Also, each genotype is replicated eight times (one per environment).
 ```{r, eval=FALSE}
 dat <- australia.soybean[, c(1, 4, 5)]
 dim(dat)
@@ -180,7 +180,7 @@ sol[9:15, ]
 
 
 ## lme4 R package
-We can conform our resutls using the [lme4](https://cran.r-project.org/web/packages/lme4/index.html) R package. 
+We can confirm our resutls using the [lme4](https://cran.r-project.org/web/packages/lme4/index.html) R package. 
 ```{r, eval=FALSE, echo=TRUE}
 # install.packages("lme4") 
 library(lme4)
@@ -191,7 +191,7 @@ rowMeans(ranef(fit)$gen)
 rowMeans(ranef(fit)$gen)[1:7]
 ```
 
-The variance components can be also obtained. 
+The variance components can also be obtained. 
 ```{r, eval=FALSE, echo=TRUE}
 data.frame((summary(fit))$varcor)$vcov
 ```
