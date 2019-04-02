@@ -42,6 +42,7 @@ source("http://morotalab.org/Mrode2005/rr/legendre.txt")
 ```
 
 ## Read phenotype and genotype files
+You can download the [G matrix](https://github.com/morota/HUJI2019/blob/gh-pages/lab2/G.txt) and [phenotype](https://github.com/morota/HUJI2019/blob/gh-pages/lab2/Pheno.txt) files [here](https://github.com/morota/HUJI2019/blob/gh-pages/lab2/).
 ```{r, eval=FALSE, echo=TRUE}
 # G matrix
 GRM <- as.matrix(read.table("G.txt", header = FALSE))
