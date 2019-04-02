@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="author" content="Gota Morota" />
+
+
+<title>Modeling longitudinal traits with a random regression model</title>
+
+<script src="lab2_files/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="lab2_files/bootstrap-3.3.6/css/bootstrap.min.css" rel="stylesheet" />
+<script src="lab2_files/bootstrap-3.3.6/js/bootstrap.min.js"></script>
+<script src="lab2_files/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<script src="lab2_files/navigation-1.1/tabsets.js"></script>
+<script src="lab2_files/navigation-1.1/codefolding.js"></script>
+<link href="lab2_files/magnific-popup-1.1.0/magnific-popup.css" rel="stylesheet" />
+<script src="lab2_files/magnific-popup-1.1.0/jquery.magnific-popup.min.js"></script>
+<link href="lab2_files/readthedown-0.1/readthedown.css" rel="stylesheet" />
+<script src="lab2_files/readthedown-0.1/readthedown.js"></script>
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; background-color: #ffffff; color: #1f1c1b; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; background-color: #ffffff; color: #a0a0a0; border-right: 1px solid #a0a0a0; }
+td.sourceCode { padding-left: 5px; }
+pre, code { color: #1f1c1b; background-color: #ffffff; }
+code > span.kw { color: #1f1c1b; font-weight: bold; } /* Keyword */
+code > span.dt { color: #0057ae; } /* DataType */
+code > span.dv { color: #b08000; } /* DecVal */
+code > span.bn { color: #b08000; } /* BaseN */
+code > span.fl { color: #b08000; } /* Float */
+code > span.cn { color: #aa5500; } /* Constant */
+code > span.ch { color: #924c9d; } /* Char */
+code > span.sc { color: #3daee9; } /* SpecialChar */
+code > span.st { color: #bf0303; } /* String */
+code > span.vs { color: #bf0303; } /* VerbatimString */
+code > span.ss { color: #ff5500; } /* SpecialString */
+code > span.im { color: #ff5500; } /* Import */
+code > span.co { color: #898887; } /* Comment */
+code > span.do { color: #607880; } /* Documentation */
+code > span.an { color: #ca60ca; } /* Annotation */
+code > span.cv { color: #0095ff; } /* CommentVar */
+code > span.ot { color: #006e28; } /* Other */
+code > span.fu { color: #644a9b; } /* Function */
+code > span.va { color: #0057ae; } /* Variable */
+code > span.cf { color: #1f1c1b; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #1f1c1b; } /* Operator */
+code > span.bu { color: #644a9b; font-weight: bold; } /* BuiltIn */
+code > span.ex { color: #0095ff; font-weight: bold; } /* Extension */
+code > span.pp { color: #006e28; } /* Preprocessor */
+code > span.at { color: #0057ae; } /* Attribute */
+code > span.re { color: #0057ae; } /* RegionMarker */
+code > span.in { color: #b08000; } /* Information */
+code > span.wa { color: #bf0303; } /* Warning */
+code > span.al { color: #bf0303; font-weight: bold; } /* Alert */
+code > span.er { color: #bf0303; text-decoration: underline; } /* Error */
+code > span. { color: #1f1c1b; } /* Normal */
+</style>
+
+
+</head>
+
+<body>
+
+
+<div id="content" data-toggle="wy-nav-shift">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<nav id="nav-top" role="navigation" aria-label="top navigation">
+    <a role="button" href="#" data-toggle="wy-nav-top"><span class="glyphicon glyphicon-menu-hamburger"></span></a>
+</nav>
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="text-muted">Code</span> <span class="text-muted caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All</a></li>
+</ul>
+</div>
+
+<div id="header">
+<h1 class="title">Modeling longitudinal traits with a random regression model</h1>
+<h1 class="subtitle">Bridging the Gap: From Phenomics to Functional Genetics Workshop <span class="citation">@HUJI</span></h1>
+</div>
+
+
+<div id="table-of-contents">
+    <h2><a href="#content">Modeling longitudinal traits with a random regression model</a></h2>
+    <div id="text-table-of-contents">
+      <ul>
+      <li><a href="#background">Background</a></li>
+      <li><a href="#read-phenotype-and-genotype-files">Read phenotype and genotype files</a></li>
+      <li><a href="#legendre-polynomials">Legendre polynomials</a></li>
+      <li><a href="#fitting-rrm">Fitting RRM</a></li>
+      <li><a href="#predicting-genetic-values-from-random-regression-coefficients">Predicting genetic values from random regression coefficients</a></li>
+      <li><a href="#comparison">Comparison</a></li>
+      </ul>
+    </div>
+</div>
+
+<div id="main">
+<div id="background" class="section level2">
+<h2>Background</h2>
+<p>We will model projected shoot area (PSA) collected over 20 time points from 89 temperate japonica rice accessions using a random regression model.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">setwd</span>(<span class="st">&quot;~/Dropbox/chikudaisei/teaching/2019/HUJI2019/lab2&quot;</span>)
+<span class="co"># install.packages(&#39;sommer&#39;) install.packages(&#39;orthopolynom&#39;)</span>
+<span class="co"># install.packages(&#39;graphics&#39;)</span>
+<span class="kw">library</span>(<span class="st">&quot;sommer&quot;</span>)
+<span class="kw">library</span>(<span class="st">&quot;orthopolynom&quot;</span>)
+<span class="kw">library</span>(<span class="st">&quot;graphics&quot;</span>)
+
+<span class="kw">source</span>(<span class="st">&quot;http://morotalab.org/Mrode2005/rr/stdtime.txt&quot;</span>)
+<span class="kw">source</span>(<span class="st">&quot;http://morotalab.org/Mrode2005/rr/legendre.txt&quot;</span>)</code></pre></div>
+</div>
+<div id="read-phenotype-and-genotype-files" class="section level2">
+<h2>Read phenotype and genotype files</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># G matrix</span>
+GRM &lt;-<span class="st"> </span><span class="kw">as.matrix</span>(<span class="kw">read.table</span>(<span class="st">&quot;G.txt&quot;</span>, <span class="dt">header =</span> <span class="ot">FALSE</span>))
+<span class="kw">dim</span>(GRM)
+
+<span class="co"># Phenotype matrix</span>
+Pheno &lt;-<span class="st"> </span><span class="kw">read.table</span>(<span class="st">&quot;Pheno.txt&quot;</span>, <span class="dt">header =</span> <span class="ot">TRUE</span>)
+<span class="kw">head</span>(Pheno)
+<span class="co"># ID should be factor not numeric</span>
+Pheno<span class="op">$</span>ID &lt;-<span class="st"> </span><span class="kw">factor</span>(Pheno<span class="op">$</span>ID)
+<span class="kw">head</span>(Pheno)
+<span class="co"># Add column names</span>
+<span class="kw">colnames</span>(GRM) &lt;-<span class="st"> </span><span class="kw">unique</span>(Pheno<span class="op">$</span>ID)
+<span class="co"># Add row names</span>
+<span class="kw">rownames</span>(GRM) &lt;-<span class="st"> </span><span class="kw">unique</span>(Pheno<span class="op">$</span>ID)</code></pre></div>
+</div>
+<div id="legendre-polynomials" class="section level2">
+<h2>Legendre polynomials</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Time =<span class="st"> </span><span class="dv">1</span><span class="op">:</span><span class="dv">20</span>
+<span class="co"># Order of fit</span>
+K &lt;-<span class="st"> </span><span class="dv">2</span>
+M &lt;-<span class="st"> </span><span class="kw">stdtime</span>(Time, K)
+Lambda &lt;-<span class="st"> </span><span class="kw">legendre</span>(K, <span class="dt">gengler =</span> <span class="ot">FALSE</span>)
+Phi &lt;-<span class="st"> </span>M <span class="op">%*%</span><span class="st"> </span><span class="kw">t</span>(Lambda)
+<span class="kw">matplot</span>(Time, Phi, <span class="dt">lwd =</span> <span class="dv">3</span>, <span class="dt">lty =</span> <span class="dv">1</span>, <span class="dt">col =</span> <span class="kw">c</span>(<span class="st">&quot;black&quot;</span>, <span class="st">&quot;red&quot;</span>, <span class="st">&quot;green&quot;</span>), <span class="dt">type =</span> <span class="st">&quot;l&quot;</span>, 
+    <span class="dt">ylab =</span> <span class="st">&quot;Legendre polynomials&quot;</span>, <span class="dt">main =</span> <span class="st">&quot;Quadratic Legendre polynomials&quot;</span>)</code></pre></div>
+</div>
+<div id="fitting-rrm" class="section level2">
+<h2>Fitting RRM</h2>
+<p>We will use the <code>mmer</code> function in the <code>sommer</code> R package.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">RRM1 &lt;-<span class="st"> </span><span class="kw">mmer</span>(Y <span class="op">~</span><span class="st"> </span><span class="dv">1</span>, <span class="dt">random =</span> <span class="op">~</span><span class="kw">vs</span>(<span class="kw">leg</span>(Time, <span class="dv">2</span>), ID, <span class="dt">Gu =</span> GRM), <span class="dt">rcov =</span> <span class="op">~</span><span class="kw">vs</span>(<span class="kw">ds</span>(Time), 
+    units), <span class="dt">data =</span> Pheno)
+<span class="kw">names</span>(RRM1)
+<span class="kw">summary</span>(RRM1)</code></pre></div>
+</div>
+<div id="predicting-genetic-values-from-random-regression-coefficients" class="section level2">
+<h2>Predicting genetic values from random regression coefficients</h2>
+<p>We will predict genetic values from linear as well as quadratic Legendre polynomials.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">RnReg_Q &lt;-<span class="st"> </span><span class="kw">rbind</span>(<span class="kw">unlist</span>(RRM1<span class="op">$</span>U<span class="op">$</span><span class="st">`</span><span class="dt">leg0:ID</span><span class="st">`</span>)  <span class="co"># 3 x 89</span>
+, <span class="kw">unlist</span>(RRM1<span class="op">$</span>U<span class="op">$</span><span class="st">`</span><span class="dt">leg1:ID</span><span class="st">`</span>), 
+    <span class="kw">unlist</span>(RRM1<span class="op">$</span>U<span class="op">$</span><span class="st">`</span><span class="dt">leg2:ID</span><span class="st">`</span>))
+<span class="kw">colnames</span>(RnReg_Q) &lt;-<span class="st"> </span><span class="kw">unique</span>(Pheno<span class="op">$</span>ID)
+RnReg_L &lt;-<span class="st"> </span>RnReg_Q[<span class="op">-</span><span class="dv">3</span>, ]
+
+Time &lt;-<span class="st"> </span><span class="kw">unique</span>(Pheno<span class="op">$</span>Time)
+Phi_Q &lt;-<span class="st"> </span><span class="kw">leg</span>(Time, <span class="dv">2</span>)
+Phi_L &lt;-<span class="st"> </span>Phi_Q[, <span class="op">-</span><span class="dv">3</span>]</code></pre></div>
+<p>Prediction of genetic values from linear Legendre polynomials.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">GEBV_L &lt;-<span class="st"> </span><span class="kw">t</span>(<span class="kw">apply</span>(RnReg_L, <span class="dv">2</span>, <span class="cf">function</span>(x) Phi_L <span class="op">%*%</span><span class="st"> </span>x))
+GEBV2_L &lt;-<span class="st"> </span><span class="kw">t</span>(Phi_L <span class="op">%*%</span><span class="st"> </span>RnReg_L)  <span class="co"># # alternative way</span>
+Pred_L &lt;-<span class="st"> </span><span class="kw">cbind</span>(Pheno, <span class="kw">c</span>(RRM1<span class="op">$</span>Beta<span class="op">$</span>Estimate <span class="op">+</span><span class="st"> </span>GEBV_L))
+<span class="kw">colnames</span>(Pred_L) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;ID&quot;</span>, <span class="st">&quot;Pe&quot;</span>, <span class="st">&quot;Time&quot;</span>, <span class="st">&quot;Observed&quot;</span>, <span class="st">&quot;Predicted&quot;</span>)</code></pre></div>
+<p>Prediction of genetic values from quadratic Legendre polynomials.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">GEBV_Q &lt;-<span class="st"> </span><span class="kw">t</span>(<span class="kw">apply</span>(RnReg_Q, <span class="dv">2</span>, <span class="cf">function</span>(x) Phi_Q <span class="op">%*%</span><span class="st"> </span>x))
+GEBV2_Q &lt;-<span class="st"> </span><span class="kw">t</span>(Phi_Q <span class="op">%*%</span><span class="st"> </span>RnReg_Q)  <span class="co"># alternative way</span>
+Pred_Q &lt;-<span class="st"> </span><span class="kw">cbind</span>(Pheno, <span class="kw">c</span>(RRM1<span class="op">$</span>Beta<span class="op">$</span>Estimate <span class="op">+</span><span class="st"> </span>GEBV_Q))
+<span class="kw">colnames</span>(Pred_Q) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;ID&quot;</span>, <span class="st">&quot;Pe&quot;</span>, <span class="st">&quot;Time&quot;</span>, <span class="st">&quot;Observed&quot;</span>, <span class="st">&quot;Predicted&quot;</span>)</code></pre></div>
+</div>
+<div id="comparison" class="section level2">
+<h2>Comparison</h2>
+<p>Here, we will visualize observed vs. predicted longitudinal PSA for 12 accessions.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">index &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">9</span>, <span class="dv">10</span>, <span class="dv">15</span>, <span class="dv">31</span>, <span class="dv">32</span>, <span class="dv">36</span>, <span class="dv">51</span>, <span class="dv">52</span>, <span class="dv">56</span>, <span class="dv">62</span>, <span class="dv">63</span>)</code></pre></div>
+<p>Prediction based on linear Legendre polynomials.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">xyplot</span>(Predicted <span class="op">+</span><span class="st"> </span>Observed <span class="op">~</span><span class="st"> </span>Time <span class="op">|</span><span class="st"> </span>ID, <span class="dt">type =</span> <span class="st">&quot;l&quot;</span>, <span class="dt">data =</span> Pred_L[<span class="kw">which</span>(Pred_L<span class="op">$</span>ID <span class="op">%in%</span><span class="st"> </span>
+<span class="st">    </span>index), ], <span class="dt">pch =</span> <span class="dv">1</span>, <span class="dt">cex =</span> <span class="dv">1</span>, <span class="dt">auto.key =</span> T, <span class="dt">ylab =</span> <span class="st">&quot;Phenotype&quot;</span>)</code></pre></div>
+<p>Prediction based on quadratic Legendre polynomials.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">xyplot</span>(Predicted <span class="op">+</span><span class="st"> </span>Observed <span class="op">~</span><span class="st"> </span>Time <span class="op">|</span><span class="st"> </span>ID, <span class="dt">type =</span> <span class="st">&quot;l&quot;</span>, <span class="dt">data =</span> Pred_Q[<span class="kw">which</span>(Pred_Q<span class="op">$</span>ID <span class="op">%in%</span><span class="st"> </span>
+<span class="st">    </span>index), ], <span class="dt">pch =</span> <span class="dv">1</span>, <span class="dt">cex =</span> <span class="fl">0.8</span>, <span class="dt">auto.key =</span> T, <span class="dt">ylab =</span> <span class="st">&quot;Phenotype&quot;</span>)</code></pre></div>
+</div>
+</div>
+
+
+</div>
+
+<div id="postamble" data-toggle="wy-nav-shift" class="status">
+<p class="author"><span class="glyphicon glyphicon-user"></span> Gota Morota</p>
+<p class="date"><span class="glyphicon glyphicon-calendar"></span> April 2, 2019</p>
+</div>
+
+
+<script>
+$(document).ready(function () {
+ 	  });
+</script>
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

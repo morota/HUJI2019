@@ -1,0 +1,147 @@
+---
+title: "Decoding mixed model equations"
+subtitle: "Bridging the Gap: From Phenomics to Functional Genetics Workshop @HUJI"
+author: "Gota Morota"
+date: "April 1, 2019"
+output:
+  rmdformats::readthedown:
+    highlight: kate
+    self_contained: false
+    code_folding: hide
+---
+
+```{r knitr_init, echo=FALSE, cache=FALSE}
+library(knitr)
+library(rmdformats)
+
+## Global options
+options(max.print="75")
+opts_chunk$set(echo=TRUE,
+	             cache=TRUE,
+               prompt=FALSE,
+               tidy=TRUE,
+               comment=NA,
+               message=FALSE,
+               warning=FALSE)
+opts_knit$set(width=75)
+```
+
+## Background
+```{r, eval=FALSE, echo=TRUE}
+setwd("~/Dropbox/chikudaisei/teaching/2019/HUJI2019/lab2")
+# install.packages("sommer")
+# install.packages("orthopolynom")
+install.packages("graphics")
+# install.packages("data.table")
+library("sommer")
+library("orthopolynom")
+library("graphics")
+#library("data.table")
+
+source("http://morotalab.org/Mrode2005/rr/stdtime.txt")
+source("http://morotalab.org/Mrode2005/rr/legendre.txt")
+```
+
+## Read phenotype and genotype files
+```{r, eval=FALSE, echo=TRUE}
+# G matrix
+GRM <- as.matrix(read.table("G.txt", header = FALSE))
+dim(GRM)
+
+# Phenotype matrix
+Pheno <-read.table("Pheno.txt", header = TRUE)        
+head(Pheno)
+# ID should be factor not numeric
+Pheno$ID<- factor(Pheno$ID)                       
+head(Pheno)
+# Add column names
+colnames(GRM) <- unique(Pheno$ID)
+# Add row names
+rownames(GRM) <- unique(Pheno$ID)                 
+```
+
+## Legendre polynomials
+```{r, eval=FALSE, echo=TRUE}
+Time= 1:20
+# Order of fit
+K <- 2
+M <- stdtime(Time, K)
+Lambda <- legendre(K, gengler = FALSE)
+Phi <- M%*% t(Lambda)
+matplot(Time, Phi, lwd=3, lty = 1, col = c("black","red","green"),type = "l",
+       ylab = "Legendre polynomials",main="Quadratic Legendre polynomials")
+```
+
+
+
+RRM.1 <-mmer(Y~1                                  # mmer function from sommer package && leg() from orthopolynom package, vs = variance structure, Gu = known covariance structures
+            ,random=~vs(leg(Time, 2),ID,Gu=GRM)
+            #,random=~vs(leg(Time, 2),ID,Gu=GRM) + vs(leg(Time, 2), Pe)
+            ,rcov=~vs(units) # residuals, units = cov=~vs(ds(Time),units)
+            #,rcov=~vs(ds(Time),units) # residuals, units = cov=~vs(ds(Time),units)
+            ,data=Pheno)
+
+names(RRM.1)
+summary(RRM.1)
+
+RnReg_Q <- rbind(unlist(RRM.1$U$`leg0:ID`),         # extract estimated random regression coeifficeints
+               unlist(RRM.1$U$`leg1:ID`),         # Num. regression coefficients* Num. IDs. Dim is RnReg x nID = 3 x 89
+               unlist(RRM.1$U$`leg2:ID`))
+
+
+
+colnames(RnReg_Q)<- unique(Pheno$ID)                # Assign IDs to columns
+
+Time <- unique(Pheno$Time)                         # Create a quadratic Legendre's
+Phi_Q <- leg(Time, 2)
+Phi_L <- Phi_Q[,-3]
+
+
+RnReg_L <- RnReg_Q[-3,]
+GEBV_L <- t(apply(RnReg_L, 2, function (x) Phi_L %*% x)) # estimating GEBVs for each IDs using RanReg: GEBV= Phi%*%RnReg
+GEBV2_L <- t(Phi_L %*% RnReg_L)
+Pred_L <- cbind(Pheno, c(RRM.1$Beta$Estimate + GEBV_L))   # merge orginal phenotype and predicted values and compare using lattice xyplot() function
+colnames(Pred_L)<- c("ID", "Pe", "Time","Observed","Predicted")
+
+
+
+IDs.f <- c(1,9,10,15,31,32,36,51,52,56,62,63)      # First 12 IDs
+
+
+# Prediction using linear Leg
+xyplot(Predicted+Observed~Time|ID,type ="l",       # xyplot() function from the lattice package
+       data = Pred_L[which(Pred_L$ID%in%IDs.f),],  # To buil the appropriate plots
+       pch=1, cex=1, auto.key=T, ylab="Phenotype")
+
+
+
+GEBV_Q <- t(apply(RnReg_Q, 2, function (x) Phi_Q %*% x)) # estimating GEBVs for each IDs using RanReg: GEBV= Phi%*%RnReg
+GEBV2_Q <- t(Phi_Q %*% RnReg_Q)
+Pred_Q <- cbind(Pheno, c(RRM.1$Beta$Estimate + GEBV_Q))   # merge orginal phenotype and predicted values and compare using lattice xyplot() function
+colnames(Pred_Q)<- c("ID", "Pe", "Time","Observed","Predicted")
+
+
+xyplot(Predicted+Observed~Time|ID,type ="l",       # xyplot() function from the lattice package
+       data = Pred_Q[which(Pred_Q$ID%in%IDs.f),],  # To buil the appropriate plots
+       pch=1,cex=.8,auto.key=T, ylab="Phenotype")
+
+
+
+
+
+
+
+RRM.2 <-mmer(Y~1                                  # mmer function from sommer package && leg() from orthopolynom package, vs = variance structure, Gu = known covariance structures
+             ,random=~vs(leg(Time, 2),ID,Gu=GRM)
+             #,random=~vs(leg(Time, 2),ID,Gu=GRM) + vs(leg(Time, 2), Pe)
+             #,rcov=~vs(units) # residuals, units = cov=~vs(ds(Time),units)
+             ,rcov=~vs(ds(Time),units) # residuals, units = cov=~vs(ds(Time),units)
+             ,data=Pheno)
+
+
+
+
+
+
+
+

@@ -1,0 +1,146 @@
+---
+title: "Modeling longitudinal traits with a random regression model"
+subtitle: "Bridging the Gap: From Phenomics to Functional Genetics Workshop @HUJI"
+author: "Gota Morota"
+date: "April 2, 2019"
+output:
+  rmdformats::readthedown:
+    highlight: kate
+    self_contained: false
+    code_folding: hide
+---
+
+```{r knitr_init, echo=FALSE, cache=FALSE}
+library(knitr)
+library(rmdformats)
+
+## Global options
+options(max.print="75")
+opts_chunk$set(echo=TRUE,
+	             cache=TRUE,
+               prompt=FALSE,
+               tidy=TRUE,
+               comment=NA,
+               message=FALSE,
+               warning=FALSE)
+opts_knit$set(width=75)
+```
+
+## Background
+We will model projected shoot area (PSA) collected over 20 time points from 89 temperate japonica rice accessions using a random regression model. 
+```{r, eval=FALSE, echo=TRUE}
+setwd("~/Dropbox/chikudaisei/teaching/2019/HUJI2019/lab2")
+# install.packages("sommer")
+# install.packages("orthopolynom")
+# install.packages("graphics")
+library("sommer")
+library("orthopolynom")
+library("graphics")
+
+source("http://morotalab.org/Mrode2005/rr/stdtime.txt")
+source("http://morotalab.org/Mrode2005/rr/legendre.txt")
+```
+
+## Read phenotype and genotype files
+```{r, eval=FALSE, echo=TRUE}
+# G matrix
+GRM <- as.matrix(read.table("G.txt", header = FALSE))
+dim(GRM)
+
+# Phenotype matrix
+Pheno <-read.table("Pheno.txt", header = TRUE)        
+head(Pheno)
+# ID should be factor not numeric
+Pheno$ID<- factor(Pheno$ID)                       
+head(Pheno)
+# Add column names
+colnames(GRM) <- unique(Pheno$ID)
+# Add row names
+rownames(GRM) <- unique(Pheno$ID)                 
+```
+
+## Legendre polynomials
+```{r, eval=FALSE, echo=TRUE}
+Time= 1:20
+# Order of fit
+K <- 2
+M <- stdtime(Time, K)
+Lambda <- legendre(K, gengler = FALSE)
+Phi <- M%*% t(Lambda)
+matplot(Time, Phi, lwd=3, lty = 1, col = c("black","red","green"),type = "l",
+       ylab = "Legendre polynomials",main="Quadratic Legendre polynomials")
+```
+
+## Fitting RRM
+We will use the `mmer` function in the `sommer` R package. 
+```{r, eval=FALSE, echo=TRUE}
+RRM1 <-mmer(Y~1    
+            ,random=~vs(leg(Time, 2), ID, Gu=GRM)
+            ,rcov=~vs(ds(Time), units) 
+            ,data=Pheno)
+names(RRM1)
+summary(RRM1)
+````
+
+## Predicting genetic values from random regression coefficients
+We will predict genetic values from linear as well as quadratic Legendre polynomials.
+```{r, eval=FALSE, echo=TRUE}
+RnReg_Q <- rbind(unlist(RRM1$U$`leg0:ID`) # 3 x 89
+               ,unlist(RRM1$U$`leg1:ID`) 
+               ,unlist(RRM1$U$`leg2:ID`)
+               )
+colnames(RnReg_Q) <- unique(Pheno$ID)                
+RnReg_L <- RnReg_Q[-3,]
+
+Time <- unique(Pheno$Time)                        
+Phi_Q <- leg(Time, 2)
+Phi_L <- Phi_Q[, -3]
+```
+
+Prediction of genetic values from linear Legendre polynomials.
+```{r, eval=FALSE, echo=TRUE}
+GEBV_L <- t(apply(RnReg_L, 2, function (x) Phi_L %*% x)) 
+GEBV2_L <- t(Phi_L %*% RnReg_L) # # alternative way
+Pred_L <- cbind(Pheno, c(RRM1$Beta$Estimate + GEBV_L))
+colnames(Pred_L)<- c("ID", "Pe", "Time","Observed","Predicted")
+```
+
+Prediction of genetic values from quadratic Legendre polynomials.
+```{r, eval=FALSE, echo=TRUE}
+GEBV_Q <- t(apply(RnReg_Q, 2, function (x) Phi_Q %*% x)) 
+GEBV2_Q <- t(Phi_Q %*% RnReg_Q) # alternative way
+Pred_Q <- cbind(Pheno, c(RRM1$Beta$Estimate + GEBV_Q))   
+colnames(Pred_Q)<- c("ID", "Pe", "Time","Observed","Predicted")
+```
+
+
+## Comparison
+Here, we will visualize observed vs. predicted longitudinal PSA for 12 accessions. 
+```{r, eval=FALSE, echo=TRUE}
+index <- c(1,9,10,15,31,32,36,51,52,56,62,63)      
+```
+
+Prediction based on linear Legendre polynomials.
+```{r, eval=FALSE, echo=TRUE}
+xyplot(Predicted+Observed~Time|ID,type ="l",  
+       data = Pred_L[which(Pred_L$ID%in%index),], 
+       pch=1, cex=1, auto.key=T, ylab="Phenotype")
+```
+
+Prediction based on quadratic Legendre polynomials.
+```{r, eval=FALSE, echo=TRUE}
+xyplot(Predicted+Observed~Time|ID,type ="l",
+       data = Pred_Q[which(Pred_Q$ID%in%index),],  
+       pch=1,cex=.8,auto.key=T, ylab="Phenotype")
+
+```
+
+
+
+
+
+
+
+
+
+
